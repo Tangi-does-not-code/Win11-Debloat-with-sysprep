@@ -58,10 +58,33 @@ Set-ItemProperty -Path "HKCU:\Software\Policies\Microsoft\Windows\WindowsCopilot
 
 
 
-#Wallpaper preto para mais performance idle
-Set-ItemProperty -Path "HKCU:\Control Panel\Colors" -Name "Background" -Value "0 0 0" -ErrorAction SilentlyContinue
-Set-ItemProperty -Path "HKCU:\Control Panel\Desktop" -Name "Wallpaper" -Value "" -ErrorAction SilentlyContinue
+# --- Configuração de Wallpaper para o Usuário Padrão (Default User) ---
+# Isso garante que novos usuários do domínio recebam a configuração
 
+Write-Host "Configurando cor de fundo azul para o perfil de usuário padrão..." -ForegroundColor Cyan
+
+$DefaultUserHive = "C:\Users\Default\NTUSER.DAT"
+
+# Verifica se o arquivo existe antes de tentar carregar
+if (Test-Path $DefaultUserHive) {
+    # 1. Carrega a colmeia do Registro do Usuário Padrão
+    reg load "HKU\DefUser_Mount" $DefaultUserHive
+
+    # 2. Aplica a cor azul (RGB: 0 120 215) e remove o caminho do wallpaper
+    Set-ItemProperty -Path "HKU\DefUser_Mount\Control Panel\Colors" -Name "Background" -Value "0 120 215" -ErrorAction SilentlyContinue
+    Set-ItemProperty -Path "HKU\DefUser_Mount\Control Panel\Desktop" -Name "Wallpaper" -Value "" -ErrorAction SilentlyContinue
+
+    # 3. Força a limpeza de memória para garantir que o arquivo não fique preso
+    [gc]::Collect()
+    Start-Sleep -Seconds 2
+
+    # 4. Descarrega a colmeia
+    reg unload "HKU\DefUser_Mount"
+    Write-Host "Perfil padrão atualizado com sucesso." -ForegroundColor Green
+} else {
+    Write-Warning "Arquivo NTUSER.DAT padrão não encontrado em $DefaultUserHive"
+}
+# -----------------------------------------------------------------------
 #aplica as mudancas visuais
 rundll32.exe user32.dll,UpdatePerUserSystemParameters
 
