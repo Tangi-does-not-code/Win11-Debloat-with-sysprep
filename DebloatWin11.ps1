@@ -75,7 +75,7 @@ Set-PSRepository -Name "PSGallery" -InstallationPolicy Trusted -ErrorAction Sile
 Install-Module PSWindowsUpdate -Force -ErrorAction SilentlyContinue
 
 Import-Module PSWindowsUpdate -ErrorAction SilentlyContinue
-Get-WindowsUpdate -Install -AcceptAll -IgnoreReboot -ErrorAction SilentlyContinue
+Get-WindowsUpdate -Install -AcceptAll -AutoReboot
 
 
 #ai ele reinicia.
